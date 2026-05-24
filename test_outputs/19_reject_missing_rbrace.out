@@ -1,0 +1,6 @@
+REJECT
+
+Syntax Error:
+Line: 1
+Unexpected token: $
+Expected one of: rbrace
