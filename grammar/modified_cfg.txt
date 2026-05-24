@@ -1,0 +1,59 @@
+# Modified Non-Ambiguous CFG for Simplified Java SLR Parser
+
+01. CODE -> VDECL CODE
+02. CODE -> FDECL CODE
+03. CODE -> CDECL CODE
+04. CODE -> epsilon
+
+05. VDECL -> vtype id semi
+06. VDECL -> vtype ASSIGN semi
+
+07. ASSIGN -> id assign RHS
+
+08. RHS -> EXPR
+09. RHS -> literal
+10. RHS -> character
+11. RHS -> boolstr
+
+12. EXPR -> TERM EXPRTAIL
+13. EXPRTAIL -> addsub TERM EXPRTAIL
+14. EXPRTAIL -> epsilon
+
+15. TERM -> FACTOR TERMTAIL
+16. TERMTAIL -> multdiv FACTOR TERMTAIL
+17. TERMTAIL -> epsilon
+
+18. FACTOR -> lparen EXPR rparen
+19. FACTOR -> id
+20. FACTOR -> num
+
+21. FDECL -> vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace
+
+22. ARG -> vtype id MOREARGS
+23. ARG -> epsilon
+
+24. MOREARGS -> comma vtype id MOREARGS
+25. MOREARGS -> epsilon
+
+26. BLOCK -> STMT BLOCK
+27. BLOCK -> epsilon
+
+28. STMT -> VDECL
+29. STMT -> ASSIGN semi
+30. STMT -> if lparen COND rparen lbrace BLOCK rbrace ELSE
+31. STMT -> while lparen COND rparen lbrace BLOCK rbrace
+
+32. COND -> boolstr CONDTAIL
+33. CONDTAIL -> comp boolstr
+34. CONDTAIL -> epsilon
+
+35. ELSE -> else lbrace BLOCK rbrace
+36. ELSE -> epsilon
+
+37. RETURN -> return RHS semi
+
+38. CDECL -> class id lbrace ODECL rbrace
+
+39. ODECL -> VDECL ODECL
+40. ODECL -> FDECL ODECL
+41. ODECL -> epsilon

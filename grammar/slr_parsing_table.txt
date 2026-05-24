@@ -1,0 +1,357 @@
+[1]. SLR grammar ('' is ε):
+
+S -> CODE
+CODE -> VDECL CODE
+CODE -> FDECL CODE
+CODE -> CDECL CODE
+CODE -> ''
+
+VDECL -> vtype id semi
+VDECL -> vtype ASSIGN semi
+
+ASSIGN -> id assign RHS
+
+RHS -> EXPR
+RHS -> literal
+RHS -> character
+RHS -> boolstr
+
+EXPR -> TERM EXPRTAIL
+EXPRTAIL -> addsub TERM EXPRTAIL
+EXPRTAIL -> ''
+
+TERM -> FACTOR TERMTAIL
+TERMTAIL -> multdiv FACTOR TERMTAIL
+TERMTAIL -> ''
+
+FACTOR -> lparen EXPR rparen
+FACTOR -> id
+FACTOR -> num
+
+FDECL -> vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace
+
+ARG -> vtype id MOREARGS
+ARG -> ''
+
+MOREARGS -> comma vtype id MOREARGS
+MOREARGS -> ''
+
+BLOCK -> STMT BLOCK
+BLOCK -> ''
+
+STMT -> VDECL
+STMT -> ASSIGN semi
+STMT -> if lparen COND rparen lbrace BLOCK rbrace ELSE
+STMT -> while lparen COND rparen lbrace BLOCK rbrace
+
+COND -> boolstr CONDTAIL
+CONDTAIL -> comp boolstr
+CONDTAIL -> ''
+
+ELSE -> else lbrace BLOCK rbrace
+ELSE -> ''
+
+RETURN -> return RHS semi
+
+CDECL -> class id lbrace ODECL rbrace
+
+ODECL -> VDECL ODECL
+ODECL -> FDECL ODECL
+ODECL -> ''
+
+
+[2] FIRST / FOLLOW table
+FIRST / FOLLOW table
+Nonterminal	FIRST	FOLLOW
+S	{'',vtype,class}	{$}
+CODE	{'',vtype,class}	{$}
+VDECL	{vtype}	{$,vtype,class,return,id,if,while,rbrace}
+ASSIGN	{id}	{semi}
+RHS	{literal,character,boolstr,lparen,id,num}	{semi}
+EXPR	{lparen,id,num}	{semi,rparen}
+EXPRTAIL	{addsub,''}	{semi,rparen}
+TERM	{lparen,id,num}	{addsub,semi,rparen}
+TERMTAIL	{multdiv,''}	{addsub,semi,rparen}
+FACTOR	{lparen,id,num}	{multdiv,addsub,semi,rparen}
+FDECL	{vtype}	{$,vtype,class,rbrace}
+ARG	{vtype,''}	{rparen}
+MOREARGS	{comma,''}	{rparen}
+BLOCK	{'',vtype,id,if,while}	{return,rbrace}
+STMT	{vtype,id,if,while}	{return,vtype,id,if,while,rbrace}
+COND	{boolstr}	{rparen}
+CONDTAIL	{comp,''}	{rparen}
+ELSE	{else,''}	{return,vtype,id,if,while,rbrace}
+RETURN	{return}	{rbrace}
+CDECL	{class}	{$,vtype,class}
+ODECL	{vtype,''}	{rbrace}
+
+
+[3] SLR Closure Table
+SLR closure table
+Goto	Kernel	State	Closure
+{S -> .CODE}	0	{S -> .CODE; CODE -> .VDECL CODE; CODE -> .FDECL CODE; CODE -> .CDECL CODE; CODE -> .; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; FDECL -> .vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace; CDECL -> .class id lbrace ODECL rbrace}
+goto(0, CODE)	{S -> CODE.}	1	{S -> CODE.}
+goto(0, VDECL)	{CODE -> VDECL.CODE}	2	{CODE -> VDECL.CODE; CODE -> .VDECL CODE; CODE -> .FDECL CODE; CODE -> .CDECL CODE; CODE -> .; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; FDECL -> .vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace; CDECL -> .class id lbrace ODECL rbrace}
+goto(0, FDECL)	{CODE -> FDECL.CODE}	3	{CODE -> FDECL.CODE; CODE -> .VDECL CODE; CODE -> .FDECL CODE; CODE -> .CDECL CODE; CODE -> .; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; FDECL -> .vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace; CDECL -> .class id lbrace ODECL rbrace}
+goto(0, CDECL)	{CODE -> CDECL.CODE}	4	{CODE -> CDECL.CODE; CODE -> .VDECL CODE; CODE -> .FDECL CODE; CODE -> .CDECL CODE; CODE -> .; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; FDECL -> .vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace; CDECL -> .class id lbrace ODECL rbrace}
+goto(0, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; FDECL -> vtype.id lparen ARG rparen lbrace BLOCK RETURN rbrace}	5	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; FDECL -> vtype.id lparen ARG rparen lbrace BLOCK RETURN rbrace; ASSIGN -> .id assign RHS}
+goto(0, class)	{CDECL -> class.id lbrace ODECL rbrace}	6	{CDECL -> class.id lbrace ODECL rbrace}
+goto(2, CODE)	{CODE -> VDECL CODE.}	7	{CODE -> VDECL CODE.}
+goto(2, VDECL)	{CODE -> VDECL.CODE}	2	 
+goto(2, FDECL)	{CODE -> FDECL.CODE}	3	 
+goto(2, CDECL)	{CODE -> CDECL.CODE}	4	 
+goto(2, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; FDECL -> vtype.id lparen ARG rparen lbrace BLOCK RETURN rbrace}	5	 
+goto(2, class)	{CDECL -> class.id lbrace ODECL rbrace}	6	 
+goto(3, CODE)	{CODE -> FDECL CODE.}	8	{CODE -> FDECL CODE.}
+goto(3, VDECL)	{CODE -> VDECL.CODE}	2	 
+goto(3, FDECL)	{CODE -> FDECL.CODE}	3	 
+goto(3, CDECL)	{CODE -> CDECL.CODE}	4	 
+goto(3, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; FDECL -> vtype.id lparen ARG rparen lbrace BLOCK RETURN rbrace}	5	 
+goto(3, class)	{CDECL -> class.id lbrace ODECL rbrace}	6	 
+goto(4, CODE)	{CODE -> CDECL CODE.}	9	{CODE -> CDECL CODE.}
+goto(4, VDECL)	{CODE -> VDECL.CODE}	2	 
+goto(4, FDECL)	{CODE -> FDECL.CODE}	3	 
+goto(4, CDECL)	{CODE -> CDECL.CODE}	4	 
+goto(4, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; FDECL -> vtype.id lparen ARG rparen lbrace BLOCK RETURN rbrace}	5	 
+goto(4, class)	{CDECL -> class.id lbrace ODECL rbrace}	6	 
+goto(5, id)	{VDECL -> vtype id.semi; FDECL -> vtype id.lparen ARG rparen lbrace BLOCK RETURN rbrace; ASSIGN -> id.assign RHS}	10	{VDECL -> vtype id.semi; FDECL -> vtype id.lparen ARG rparen lbrace BLOCK RETURN rbrace; ASSIGN -> id.assign RHS}
+goto(5, ASSIGN)	{VDECL -> vtype ASSIGN.semi}	11	{VDECL -> vtype ASSIGN.semi}
+goto(6, id)	{CDECL -> class id.lbrace ODECL rbrace}	12	{CDECL -> class id.lbrace ODECL rbrace}
+goto(10, semi)	{VDECL -> vtype id semi.}	13	{VDECL -> vtype id semi.}
+goto(10, lparen)	{FDECL -> vtype id lparen.ARG rparen lbrace BLOCK RETURN rbrace}	14	{FDECL -> vtype id lparen.ARG rparen lbrace BLOCK RETURN rbrace; ARG -> .vtype id MOREARGS; ARG -> .}
+goto(10, assign)	{ASSIGN -> id assign.RHS}	15	{ASSIGN -> id assign.RHS; RHS -> .EXPR; RHS -> .literal; RHS -> .character; RHS -> .boolstr; EXPR -> .TERM EXPRTAIL; TERM -> .FACTOR TERMTAIL; FACTOR -> .lparen EXPR rparen; FACTOR -> .id; FACTOR -> .num}
+goto(11, semi)	{VDECL -> vtype ASSIGN semi.}	16	{VDECL -> vtype ASSIGN semi.}
+goto(12, lbrace)	{CDECL -> class id lbrace.ODECL rbrace}	17	{CDECL -> class id lbrace.ODECL rbrace; ODECL -> .VDECL ODECL; ODECL -> .FDECL ODECL; ODECL -> .; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; FDECL -> .vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace}
+goto(14, ARG)	{FDECL -> vtype id lparen ARG.rparen lbrace BLOCK RETURN rbrace}	18	{FDECL -> vtype id lparen ARG.rparen lbrace BLOCK RETURN rbrace}
+goto(14, vtype)	{ARG -> vtype.id MOREARGS}	19	{ARG -> vtype.id MOREARGS}
+goto(15, RHS)	{ASSIGN -> id assign RHS.}	20	{ASSIGN -> id assign RHS.}
+goto(15, EXPR)	{RHS -> EXPR.}	21	{RHS -> EXPR.}
+goto(15, literal)	{RHS -> literal.}	22	{RHS -> literal.}
+goto(15, character)	{RHS -> character.}	23	{RHS -> character.}
+goto(15, boolstr)	{RHS -> boolstr.}	24	{RHS -> boolstr.}
+goto(15, TERM)	{EXPR -> TERM.EXPRTAIL}	25	{EXPR -> TERM.EXPRTAIL; EXPRTAIL -> .addsub TERM EXPRTAIL; EXPRTAIL -> .}
+goto(15, FACTOR)	{TERM -> FACTOR.TERMTAIL}	26	{TERM -> FACTOR.TERMTAIL; TERMTAIL -> .multdiv FACTOR TERMTAIL; TERMTAIL -> .}
+goto(15, lparen)	{FACTOR -> lparen.EXPR rparen}	27	{FACTOR -> lparen.EXPR rparen; EXPR -> .TERM EXPRTAIL; TERM -> .FACTOR TERMTAIL; FACTOR -> .lparen EXPR rparen; FACTOR -> .id; FACTOR -> .num}
+goto(15, id)	{FACTOR -> id.}	28	{FACTOR -> id.}
+goto(15, num)	{FACTOR -> num.}	29	{FACTOR -> num.}
+goto(17, ODECL)	{CDECL -> class id lbrace ODECL.rbrace}	30	{CDECL -> class id lbrace ODECL.rbrace}
+goto(17, VDECL)	{ODECL -> VDECL.ODECL}	31	{ODECL -> VDECL.ODECL; ODECL -> .VDECL ODECL; ODECL -> .FDECL ODECL; ODECL -> .; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; FDECL -> .vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace}
+goto(17, FDECL)	{ODECL -> FDECL.ODECL}	32	{ODECL -> FDECL.ODECL; ODECL -> .VDECL ODECL; ODECL -> .FDECL ODECL; ODECL -> .; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; FDECL -> .vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace}
+goto(17, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; FDECL -> vtype.id lparen ARG rparen lbrace BLOCK RETURN rbrace}	5	 
+goto(18, rparen)	{FDECL -> vtype id lparen ARG rparen.lbrace BLOCK RETURN rbrace}	33	{FDECL -> vtype id lparen ARG rparen.lbrace BLOCK RETURN rbrace}
+goto(19, id)	{ARG -> vtype id.MOREARGS}	34	{ARG -> vtype id.MOREARGS; MOREARGS -> .comma vtype id MOREARGS; MOREARGS -> .}
+goto(25, EXPRTAIL)	{EXPR -> TERM EXPRTAIL.}	35	{EXPR -> TERM EXPRTAIL.}
+goto(25, addsub)	{EXPRTAIL -> addsub.TERM EXPRTAIL}	36	{EXPRTAIL -> addsub.TERM EXPRTAIL; TERM -> .FACTOR TERMTAIL; FACTOR -> .lparen EXPR rparen; FACTOR -> .id; FACTOR -> .num}
+goto(26, TERMTAIL)	{TERM -> FACTOR TERMTAIL.}	37	{TERM -> FACTOR TERMTAIL.}
+goto(26, multdiv)	{TERMTAIL -> multdiv.FACTOR TERMTAIL}	38	{TERMTAIL -> multdiv.FACTOR TERMTAIL; FACTOR -> .lparen EXPR rparen; FACTOR -> .id; FACTOR -> .num}
+goto(27, EXPR)	{FACTOR -> lparen EXPR.rparen}	39	{FACTOR -> lparen EXPR.rparen}
+goto(27, TERM)	{EXPR -> TERM.EXPRTAIL}	25	 
+goto(27, FACTOR)	{TERM -> FACTOR.TERMTAIL}	26	 
+goto(27, lparen)	{FACTOR -> lparen.EXPR rparen}	27	 
+goto(27, id)	{FACTOR -> id.}	28	 
+goto(27, num)	{FACTOR -> num.}	29	 
+goto(30, rbrace)	{CDECL -> class id lbrace ODECL rbrace.}	40	{CDECL -> class id lbrace ODECL rbrace.}
+goto(31, ODECL)	{ODECL -> VDECL ODECL.}	41	{ODECL -> VDECL ODECL.}
+goto(31, VDECL)	{ODECL -> VDECL.ODECL}	31	 
+goto(31, FDECL)	{ODECL -> FDECL.ODECL}	32	 
+goto(31, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; FDECL -> vtype.id lparen ARG rparen lbrace BLOCK RETURN rbrace}	5	 
+goto(32, ODECL)	{ODECL -> FDECL ODECL.}	42	{ODECL -> FDECL ODECL.}
+goto(32, VDECL)	{ODECL -> VDECL.ODECL}	31	 
+goto(32, FDECL)	{ODECL -> FDECL.ODECL}	32	 
+goto(32, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; FDECL -> vtype.id lparen ARG rparen lbrace BLOCK RETURN rbrace}	5	 
+goto(33, lbrace)	{FDECL -> vtype id lparen ARG rparen lbrace.BLOCK RETURN rbrace}	43	{FDECL -> vtype id lparen ARG rparen lbrace.BLOCK RETURN rbrace; BLOCK -> .STMT BLOCK; BLOCK -> .; STMT -> .VDECL; STMT -> .ASSIGN semi; STMT -> .if lparen COND rparen lbrace BLOCK rbrace ELSE; STMT -> .while lparen COND rparen lbrace BLOCK rbrace; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; ASSIGN -> .id assign RHS}
+goto(34, MOREARGS)	{ARG -> vtype id MOREARGS.}	44	{ARG -> vtype id MOREARGS.}
+goto(34, comma)	{MOREARGS -> comma.vtype id MOREARGS}	45	{MOREARGS -> comma.vtype id MOREARGS}
+goto(36, TERM)	{EXPRTAIL -> addsub TERM.EXPRTAIL}	46	{EXPRTAIL -> addsub TERM.EXPRTAIL; EXPRTAIL -> .addsub TERM EXPRTAIL; EXPRTAIL -> .}
+goto(36, FACTOR)	{TERM -> FACTOR.TERMTAIL}	26	 
+goto(36, lparen)	{FACTOR -> lparen.EXPR rparen}	27	 
+goto(36, id)	{FACTOR -> id.}	28	 
+goto(36, num)	{FACTOR -> num.}	29	 
+goto(38, FACTOR)	{TERMTAIL -> multdiv FACTOR.TERMTAIL}	47	{TERMTAIL -> multdiv FACTOR.TERMTAIL; TERMTAIL -> .multdiv FACTOR TERMTAIL; TERMTAIL -> .}
+goto(38, lparen)	{FACTOR -> lparen.EXPR rparen}	27	 
+goto(38, id)	{FACTOR -> id.}	28	 
+goto(38, num)	{FACTOR -> num.}	29	 
+goto(39, rparen)	{FACTOR -> lparen EXPR rparen.}	48	{FACTOR -> lparen EXPR rparen.}
+goto(43, BLOCK)	{FDECL -> vtype id lparen ARG rparen lbrace BLOCK.RETURN rbrace}	49	{FDECL -> vtype id lparen ARG rparen lbrace BLOCK.RETURN rbrace; RETURN -> .return RHS semi}
+goto(43, STMT)	{BLOCK -> STMT.BLOCK}	50	{BLOCK -> STMT.BLOCK; BLOCK -> .STMT BLOCK; BLOCK -> .; STMT -> .VDECL; STMT -> .ASSIGN semi; STMT -> .if lparen COND rparen lbrace BLOCK rbrace ELSE; STMT -> .while lparen COND rparen lbrace BLOCK rbrace; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; ASSIGN -> .id assign RHS}
+goto(43, VDECL)	{STMT -> VDECL.}	51	{STMT -> VDECL.}
+goto(43, ASSIGN)	{STMT -> ASSIGN.semi}	52	{STMT -> ASSIGN.semi}
+goto(43, if)	{STMT -> if.lparen COND rparen lbrace BLOCK rbrace ELSE}	53	{STMT -> if.lparen COND rparen lbrace BLOCK rbrace ELSE}
+goto(43, while)	{STMT -> while.lparen COND rparen lbrace BLOCK rbrace}	54	{STMT -> while.lparen COND rparen lbrace BLOCK rbrace}
+goto(43, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi}	55	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi; ASSIGN -> .id assign RHS}
+goto(43, id)	{ASSIGN -> id.assign RHS}	56	{ASSIGN -> id.assign RHS}
+goto(45, vtype)	{MOREARGS -> comma vtype.id MOREARGS}	57	{MOREARGS -> comma vtype.id MOREARGS}
+goto(46, EXPRTAIL)	{EXPRTAIL -> addsub TERM EXPRTAIL.}	58	{EXPRTAIL -> addsub TERM EXPRTAIL.}
+goto(46, addsub)	{EXPRTAIL -> addsub.TERM EXPRTAIL}	36	 
+goto(47, TERMTAIL)	{TERMTAIL -> multdiv FACTOR TERMTAIL.}	59	{TERMTAIL -> multdiv FACTOR TERMTAIL.}
+goto(47, multdiv)	{TERMTAIL -> multdiv.FACTOR TERMTAIL}	38	 
+goto(49, RETURN)	{FDECL -> vtype id lparen ARG rparen lbrace BLOCK RETURN.rbrace}	60	{FDECL -> vtype id lparen ARG rparen lbrace BLOCK RETURN.rbrace}
+goto(49, return)	{RETURN -> return.RHS semi}	61	{RETURN -> return.RHS semi; RHS -> .EXPR; RHS -> .literal; RHS -> .character; RHS -> .boolstr; EXPR -> .TERM EXPRTAIL; TERM -> .FACTOR TERMTAIL; FACTOR -> .lparen EXPR rparen; FACTOR -> .id; FACTOR -> .num}
+goto(50, BLOCK)	{BLOCK -> STMT BLOCK.}	62	{BLOCK -> STMT BLOCK.}
+goto(50, STMT)	{BLOCK -> STMT.BLOCK}	50	 
+goto(50, VDECL)	{STMT -> VDECL.}	51	 
+goto(50, ASSIGN)	{STMT -> ASSIGN.semi}	52	 
+goto(50, if)	{STMT -> if.lparen COND rparen lbrace BLOCK rbrace ELSE}	53	 
+goto(50, while)	{STMT -> while.lparen COND rparen lbrace BLOCK rbrace}	54	 
+goto(50, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi}	55	 
+goto(50, id)	{ASSIGN -> id.assign RHS}	56	 
+goto(52, semi)	{STMT -> ASSIGN semi.}	63	{STMT -> ASSIGN semi.}
+goto(53, lparen)	{STMT -> if lparen.COND rparen lbrace BLOCK rbrace ELSE}	64	{STMT -> if lparen.COND rparen lbrace BLOCK rbrace ELSE; COND -> .boolstr CONDTAIL}
+goto(54, lparen)	{STMT -> while lparen.COND rparen lbrace BLOCK rbrace}	65	{STMT -> while lparen.COND rparen lbrace BLOCK rbrace; COND -> .boolstr CONDTAIL}
+goto(55, id)	{VDECL -> vtype id.semi; ASSIGN -> id.assign RHS}	66	{VDECL -> vtype id.semi; ASSIGN -> id.assign RHS}
+goto(55, ASSIGN)	{VDECL -> vtype ASSIGN.semi}	11	 
+goto(56, assign)	{ASSIGN -> id assign.RHS}	15	 
+goto(57, id)	{MOREARGS -> comma vtype id.MOREARGS}	67	{MOREARGS -> comma vtype id.MOREARGS; MOREARGS -> .comma vtype id MOREARGS; MOREARGS -> .}
+goto(60, rbrace)	{FDECL -> vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace.}	68	{FDECL -> vtype id lparen ARG rparen lbrace BLOCK RETURN rbrace.}
+goto(61, RHS)	{RETURN -> return RHS.semi}	69	{RETURN -> return RHS.semi}
+goto(61, EXPR)	{RHS -> EXPR.}	21	 
+goto(61, literal)	{RHS -> literal.}	22	 
+goto(61, character)	{RHS -> character.}	23	 
+goto(61, boolstr)	{RHS -> boolstr.}	24	 
+goto(61, TERM)	{EXPR -> TERM.EXPRTAIL}	25	 
+goto(61, FACTOR)	{TERM -> FACTOR.TERMTAIL}	26	 
+goto(61, lparen)	{FACTOR -> lparen.EXPR rparen}	27	 
+goto(61, id)	{FACTOR -> id.}	28	 
+goto(61, num)	{FACTOR -> num.}	29	 
+goto(64, COND)	{STMT -> if lparen COND.rparen lbrace BLOCK rbrace ELSE}	70	{STMT -> if lparen COND.rparen lbrace BLOCK rbrace ELSE}
+goto(64, boolstr)	{COND -> boolstr.CONDTAIL}	71	{COND -> boolstr.CONDTAIL; CONDTAIL -> .comp boolstr; CONDTAIL -> .}
+goto(65, COND)	{STMT -> while lparen COND.rparen lbrace BLOCK rbrace}	72	{STMT -> while lparen COND.rparen lbrace BLOCK rbrace}
+goto(65, boolstr)	{COND -> boolstr.CONDTAIL}	71	 
+goto(66, semi)	{VDECL -> vtype id semi.}	13	 
+goto(66, assign)	{ASSIGN -> id assign.RHS}	15	 
+goto(67, MOREARGS)	{MOREARGS -> comma vtype id MOREARGS.}	73	{MOREARGS -> comma vtype id MOREARGS.}
+goto(67, comma)	{MOREARGS -> comma.vtype id MOREARGS}	45	 
+goto(69, semi)	{RETURN -> return RHS semi.}	74	{RETURN -> return RHS semi.}
+goto(70, rparen)	{STMT -> if lparen COND rparen.lbrace BLOCK rbrace ELSE}	75	{STMT -> if lparen COND rparen.lbrace BLOCK rbrace ELSE}
+goto(71, CONDTAIL)	{COND -> boolstr CONDTAIL.}	76	{COND -> boolstr CONDTAIL.}
+goto(71, comp)	{CONDTAIL -> comp.boolstr}	77	{CONDTAIL -> comp.boolstr}
+goto(72, rparen)	{STMT -> while lparen COND rparen.lbrace BLOCK rbrace}	78	{STMT -> while lparen COND rparen.lbrace BLOCK rbrace}
+goto(75, lbrace)	{STMT -> if lparen COND rparen lbrace.BLOCK rbrace ELSE}	79	{STMT -> if lparen COND rparen lbrace.BLOCK rbrace ELSE; BLOCK -> .STMT BLOCK; BLOCK -> .; STMT -> .VDECL; STMT -> .ASSIGN semi; STMT -> .if lparen COND rparen lbrace BLOCK rbrace ELSE; STMT -> .while lparen COND rparen lbrace BLOCK rbrace; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; ASSIGN -> .id assign RHS}
+goto(77, boolstr)	{CONDTAIL -> comp boolstr.}	80	{CONDTAIL -> comp boolstr.}
+goto(78, lbrace)	{STMT -> while lparen COND rparen lbrace.BLOCK rbrace}	81	{STMT -> while lparen COND rparen lbrace.BLOCK rbrace; BLOCK -> .STMT BLOCK; BLOCK -> .; STMT -> .VDECL; STMT -> .ASSIGN semi; STMT -> .if lparen COND rparen lbrace BLOCK rbrace ELSE; STMT -> .while lparen COND rparen lbrace BLOCK rbrace; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; ASSIGN -> .id assign RHS}
+goto(79, BLOCK)	{STMT -> if lparen COND rparen lbrace BLOCK.rbrace ELSE}	82	{STMT -> if lparen COND rparen lbrace BLOCK.rbrace ELSE}
+goto(79, STMT)	{BLOCK -> STMT.BLOCK}	50	 
+goto(79, VDECL)	{STMT -> VDECL.}	51	 
+goto(79, ASSIGN)	{STMT -> ASSIGN.semi}	52	 
+goto(79, if)	{STMT -> if.lparen COND rparen lbrace BLOCK rbrace ELSE}	53	 
+goto(79, while)	{STMT -> while.lparen COND rparen lbrace BLOCK rbrace}	54	 
+goto(79, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi}	55	 
+goto(79, id)	{ASSIGN -> id.assign RHS}	56	 
+goto(81, BLOCK)	{STMT -> while lparen COND rparen lbrace BLOCK.rbrace}	83	{STMT -> while lparen COND rparen lbrace BLOCK.rbrace}
+goto(81, STMT)	{BLOCK -> STMT.BLOCK}	50	 
+goto(81, VDECL)	{STMT -> VDECL.}	51	 
+goto(81, ASSIGN)	{STMT -> ASSIGN.semi}	52	 
+goto(81, if)	{STMT -> if.lparen COND rparen lbrace BLOCK rbrace ELSE}	53	 
+goto(81, while)	{STMT -> while.lparen COND rparen lbrace BLOCK rbrace}	54	 
+goto(81, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi}	55	 
+goto(81, id)	{ASSIGN -> id.assign RHS}	56	 
+goto(82, rbrace)	{STMT -> if lparen COND rparen lbrace BLOCK rbrace.ELSE}	84	{STMT -> if lparen COND rparen lbrace BLOCK rbrace.ELSE; ELSE -> .else lbrace BLOCK rbrace; ELSE -> .}
+goto(83, rbrace)	{STMT -> while lparen COND rparen lbrace BLOCK rbrace.}	85	{STMT -> while lparen COND rparen lbrace BLOCK rbrace.}
+goto(84, ELSE)	{STMT -> if lparen COND rparen lbrace BLOCK rbrace ELSE.}	86	{STMT -> if lparen COND rparen lbrace BLOCK rbrace ELSE.}
+goto(84, else)	{ELSE -> else.lbrace BLOCK rbrace}	87	{ELSE -> else.lbrace BLOCK rbrace}
+goto(87, lbrace)	{ELSE -> else lbrace.BLOCK rbrace}	88	{ELSE -> else lbrace.BLOCK rbrace; BLOCK -> .STMT BLOCK; BLOCK -> .; STMT -> .VDECL; STMT -> .ASSIGN semi; STMT -> .if lparen COND rparen lbrace BLOCK rbrace ELSE; STMT -> .while lparen COND rparen lbrace BLOCK rbrace; VDECL -> .vtype id semi; VDECL -> .vtype ASSIGN semi; ASSIGN -> .id assign RHS}
+goto(88, BLOCK)	{ELSE -> else lbrace BLOCK.rbrace}	89	{ELSE -> else lbrace BLOCK.rbrace}
+goto(88, STMT)	{BLOCK -> STMT.BLOCK}	50	 
+goto(88, VDECL)	{STMT -> VDECL.}	51	 
+goto(88, ASSIGN)	{STMT -> ASSIGN.semi}	52	 
+goto(88, if)	{STMT -> if.lparen COND rparen lbrace BLOCK rbrace ELSE}	53	 
+goto(88, while)	{STMT -> while.lparen COND rparen lbrace BLOCK rbrace}	54	 
+goto(88, vtype)	{VDECL -> vtype.id semi; VDECL -> vtype.ASSIGN semi}	55	 
+goto(88, id)	{ASSIGN -> id.assign RHS}	56	 
+goto(89, rbrace)	{ELSE -> else lbrace BLOCK rbrace.}	90	{ELSE -> else lbrace BLOCK rbrace.}
+
+[4] LR Table
+LR table
+State	ACTION	GOTO
+vtype	id	semi	assign	literal	character	boolstr	addsub	multdiv	lparen	rparen	num	lbrace	rbrace	comma	if	while	comp	else	return	class	$	S	CODE	VDECL	ASSIGN	RHS	EXPR	EXPRTAIL	TERM	TERMTAIL	FACTOR	FDECL	ARG	MOREARGS	BLOCK	STMT	COND	CONDTAIL	ELSE	RETURN	CDECL	ODECL
+0	s5	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	s6	r4	 	1	2	 	 	 	 	 	 	 	3	 	 	 	 	 	 	 	 	4	 
+1	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	acc	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+2	s5	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	s6	r4	 	7	2	 	 	 	 	 	 	 	3	 	 	 	 	 	 	 	 	4	 
+3	s5	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	s6	r4	 	8	2	 	 	 	 	 	 	 	3	 	 	 	 	 	 	 	 	4	 
+4	s5	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	s6	r4	 	9	2	 	 	 	 	 	 	 	3	 	 	 	 	 	 	 	 	4	 
+5	 	s10	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	11	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+6	 	s12	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+7	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	r1	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+8	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	r2	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+9	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	r3	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+10	 	 	s13	s15	 	 	 	 	 	s14	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+11	 	 	s16	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+12	 	 	 	 	 	 	 	 	 	 	 	 	s17	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+13	r5	r5	 	 	 	 	 	 	 	 	 	 	 	r5	 	r5	r5	 	 	r5	r5	r5	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+14	s19	 	 	 	 	 	 	 	 	 	r23	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	18	 	 	 	 	 	 	 	 	 
+15	 	s28	 	 	s22	s23	s24	 	 	s27	 	s29	 	 	 	 	 	 	 	 	 	 	 	 	 	 	20	21	 	25	 	26	 	 	 	 	 	 	 	 	 	 	 
+16	r6	r6	 	 	 	 	 	 	 	 	 	 	 	r6	 	r6	r6	 	 	r6	r6	r6	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+17	s5	 	 	 	 	 	 	 	 	 	 	 	 	r41	 	 	 	 	 	 	 	 	 	 	31	 	 	 	 	 	 	 	32	 	 	 	 	 	 	 	 	 	30
+18	 	 	 	 	 	 	 	 	 	 	s33	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+19	 	s34	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+20	 	 	r7	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+21	 	 	r8	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+22	 	 	r9	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+23	 	 	r10	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+24	 	 	r11	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+25	 	 	r14	 	 	 	 	s36	 	 	r14	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	35	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+26	 	 	r17	 	 	 	 	r17	s38	 	r17	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	37	 	 	 	 	 	 	 	 	 	 	 	 
+27	 	s28	 	 	 	 	 	 	 	s27	 	s29	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	39	 	25	 	26	 	 	 	 	 	 	 	 	 	 	 
+28	 	 	r19	 	 	 	 	r19	r19	 	r19	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+29	 	 	r20	 	 	 	 	r20	r20	 	r20	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+30	 	 	 	 	 	 	 	 	 	 	 	 	 	s40	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+31	s5	 	 	 	 	 	 	 	 	 	 	 	 	r41	 	 	 	 	 	 	 	 	 	 	31	 	 	 	 	 	 	 	32	 	 	 	 	 	 	 	 	 	41
+32	s5	 	 	 	 	 	 	 	 	 	 	 	 	r41	 	 	 	 	 	 	 	 	 	 	31	 	 	 	 	 	 	 	32	 	 	 	 	 	 	 	 	 	42
+33	 	 	 	 	 	 	 	 	 	 	 	 	s43	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+34	 	 	 	 	 	 	 	 	 	 	r25	 	 	 	s45	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	44	 	 	 	 	 	 	 	 
+35	 	 	r12	 	 	 	 	 	 	 	r12	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+36	 	s28	 	 	 	 	 	 	 	s27	 	s29	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	46	 	26	 	 	 	 	 	 	 	 	 	 	 
+37	 	 	r15	 	 	 	 	r15	 	 	r15	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+38	 	s28	 	 	 	 	 	 	 	s27	 	s29	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	47	 	 	 	 	 	 	 	 	 	 	 
+39	 	 	 	 	 	 	 	 	 	 	s48	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+40	r38	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	r38	r38	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+41	 	 	 	 	 	 	 	 	 	 	 	 	 	r39	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+42	 	 	 	 	 	 	 	 	 	 	 	 	 	r40	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+43	s55	s56	 	 	 	 	 	 	 	 	 	 	 	r27	 	s53	s54	 	 	r27	 	 	 	 	51	52	 	 	 	 	 	 	 	 	 	49	50	 	 	 	 	 	 
+44	 	 	 	 	 	 	 	 	 	 	r22	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+45	s57	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+46	 	 	r14	 	 	 	 	s36	 	 	r14	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	58	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+47	 	 	r17	 	 	 	 	r17	s38	 	r17	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	59	 	 	 	 	 	 	 	 	 	 	 	 
+48	 	 	r18	 	 	 	 	r18	r18	 	r18	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+49	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	s61	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	60	 	 
+50	s55	s56	 	 	 	 	 	 	 	 	 	 	 	r27	 	s53	s54	 	 	r27	 	 	 	 	51	52	 	 	 	 	 	 	 	 	 	62	50	 	 	 	 	 	 
+51	r28	r28	 	 	 	 	 	 	 	 	 	 	 	r28	 	r28	r28	 	 	r28	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+52	 	 	s63	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+53	 	 	 	 	 	 	 	 	 	s64	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+54	 	 	 	 	 	 	 	 	 	s65	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+55	 	s66	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	11	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+56	 	 	 	s15	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+57	 	s67	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+58	 	 	r13	 	 	 	 	 	 	 	r13	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+59	 	 	r16	 	 	 	 	r16	 	 	r16	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+60	 	 	 	 	 	 	 	 	 	 	 	 	 	s68	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+61	 	s28	 	 	s22	s23	s24	 	 	s27	 	s29	 	 	 	 	 	 	 	 	 	 	 	 	 	 	69	21	 	25	 	26	 	 	 	 	 	 	 	 	 	 	 
+62	 	 	 	 	 	 	 	 	 	 	 	 	 	r26	 	 	 	 	 	r26	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+63	r29	r29	 	 	 	 	 	 	 	 	 	 	 	r29	 	r29	r29	 	 	r29	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+64	 	 	 	 	 	 	s71	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	70	 	 	 	 	 
+65	 	 	 	 	 	 	s71	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	72	 	 	 	 	 
+66	 	 	s13	s15	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+67	 	 	 	 	 	 	 	 	 	 	r25	 	 	 	s45	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	73	 	 	 	 	 	 	 	 
+68	r21	 	 	 	 	 	 	 	 	 	 	 	 	r21	 	 	 	 	 	 	r21	r21	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+69	 	 	s74	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+70	 	 	 	 	 	 	 	 	 	 	s75	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+71	 	 	 	 	 	 	 	 	 	 	r34	 	 	 	 	 	 	s77	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	76	 	 	 	 
+72	 	 	 	 	 	 	 	 	 	 	s78	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+73	 	 	 	 	 	 	 	 	 	 	r24	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+74	 	 	 	 	 	 	 	 	 	 	 	 	 	r37	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+75	 	 	 	 	 	 	 	 	 	 	 	 	s79	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+76	 	 	 	 	 	 	 	 	 	 	r32	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+77	 	 	 	 	 	 	s80	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+78	 	 	 	 	 	 	 	 	 	 	 	 	s81	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+79	s55	s56	 	 	 	 	 	 	 	 	 	 	 	r27	 	s53	s54	 	 	r27	 	 	 	 	51	52	 	 	 	 	 	 	 	 	 	82	50	 	 	 	 	 	 
+80	 	 	 	 	 	 	 	 	 	 	r33	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+81	s55	s56	 	 	 	 	 	 	 	 	 	 	 	r27	 	s53	s54	 	 	r27	 	 	 	 	51	52	 	 	 	 	 	 	 	 	 	83	50	 	 	 	 	 	 
+82	 	 	 	 	 	 	 	 	 	 	 	 	 	s84	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+83	 	 	 	 	 	 	 	 	 	 	 	 	 	s85	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+84	r36	r36	 	 	 	 	 	 	 	 	 	 	 	r36	 	r36	r36	 	s87	r36	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	86	 	 	 
+85	r31	r31	 	 	 	 	 	 	 	 	 	 	 	r31	 	r31	r31	 	 	r31	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+86	r30	r30	 	 	 	 	 	 	 	 	 	 	 	r30	 	r30	r30	 	 	r30	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+87	 	 	 	 	 	 	 	 	 	 	 	 	s88	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+88	s55	s56	 	 	 	 	 	 	 	 	 	 	 	r27	 	s53	s54	 	 	r27	 	 	 	 	51	52	 	 	 	 	 	 	 	 	 	89	50	 	 	 	 	 	 
+89	 	 	 	 	 	 	 	 	 	 	 	 	 	s90	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+90	r35	r35	 	 	 	 	 	 	 	 	 	 	 	r35	 	r35	r35	 	 	r35	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
