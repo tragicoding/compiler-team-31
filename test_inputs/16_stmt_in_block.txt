@@ -1,0 +1,5 @@
+vtype id lparen rparen lbrace
+vtype id semi
+id assign num semi
+return num semi
+rbrace

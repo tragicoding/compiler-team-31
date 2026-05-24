@@ -1,0 +1,37 @@
+ACCEPT
+
+Parse Tree:
+└── CODE
+    ├── CDECL
+    │   ├── class
+    │   ├── id
+    │   ├── lbrace
+    │   ├── ODECL
+    │   │   ├── FDECL
+    │   │   │   ├── vtype
+    │   │   │   ├── id
+    │   │   │   ├── lparen
+    │   │   │   ├── ARG
+    │   │   │   │   └── ε
+    │   │   │   ├── rparen
+    │   │   │   ├── lbrace
+    │   │   │   ├── BLOCK
+    │   │   │   │   └── ε
+    │   │   │   ├── RETURN
+    │   │   │   │   ├── return
+    │   │   │   │   ├── RHS
+    │   │   │   │   │   └── EXPR
+    │   │   │   │   │       ├── TERM
+    │   │   │   │   │       │   ├── FACTOR
+    │   │   │   │   │       │   │   └── num
+    │   │   │   │   │       │   └── TERMTAIL
+    │   │   │   │   │       │       └── ε
+    │   │   │   │   │       └── EXPRTAIL
+    │   │   │   │   │           └── ε
+    │   │   │   │   └── semi
+    │   │   │   └── rbrace
+    │   │   └── ODECL
+    │   │       └── ε
+    │   └── rbrace
+    └── CODE
+        └── ε

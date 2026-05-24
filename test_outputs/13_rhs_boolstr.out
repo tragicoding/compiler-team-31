@@ -1,0 +1,14 @@
+ACCEPT
+
+Parse Tree:
+└── CODE
+    ├── VDECL
+    │   ├── vtype
+    │   ├── ASSIGN
+    │   │   ├── id
+    │   │   ├── assign
+    │   │   └── RHS
+    │   │       └── boolstr
+    │   └── semi
+    └── CODE
+        └── ε
