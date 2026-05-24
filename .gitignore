@@ -1,13 +1,16 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
-*.pyd
 
-.env
-.venv/
-venv/
-
+# OS
 .DS_Store
 Thumbs.db
 
-*.log
+# IDE
+.vscode/
+.idea/
+
+# Project artifacts
+*.zip
+*.tar.gz

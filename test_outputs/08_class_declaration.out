@@ -1,0 +1,18 @@
+ACCEPT
+
+Parse Tree:
+└── CODE
+    ├── CDECL
+    │   ├── class
+    │   ├── id
+    │   ├── lbrace
+    │   ├── ODECL
+    │   │   ├── VDECL
+    │   │   │   ├── vtype
+    │   │   │   ├── id
+    │   │   │   └── semi
+    │   │   └── ODECL
+    │   │       └── ε
+    │   └── rbrace
+    └── CODE
+        └── ε

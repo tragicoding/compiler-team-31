@@ -1,0 +1,32 @@
+ACCEPT
+
+Parse Tree:
+└── CODE
+    ├── VDECL
+    │   ├── vtype
+    │   ├── ASSIGN
+    │   │   ├── id
+    │   │   ├── assign
+    │   │   └── RHS
+    │   │       └── EXPR
+    │   │           ├── TERM
+    │   │           │   ├── FACTOR
+    │   │           │   │   └── id
+    │   │           │   └── TERMTAIL
+    │   │           │       └── ε
+    │   │           └── EXPRTAIL
+    │   │               ├── addsub
+    │   │               ├── TERM
+    │   │               │   ├── FACTOR
+    │   │               │   │   └── num
+    │   │               │   └── TERMTAIL
+    │   │               │       ├── multdiv
+    │   │               │       ├── FACTOR
+    │   │               │       │   └── id
+    │   │               │       └── TERMTAIL
+    │   │               │           └── ε
+    │   │               └── EXPRTAIL
+    │   │                   └── ε
+    │   └── semi
+    └── CODE
+        └── ε

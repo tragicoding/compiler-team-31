@@ -1,6 +1,20 @@
 #!/usr/bin/env python3
 import sys
 
+TERMINALS = [
+    "vtype", "id", "semi", "assign", "literal", "character", "boolstr",
+    "addsub", "multdiv", "lparen", "rparen", "num",
+    "lbrace", "rbrace", "comma", "if", "while", "comp",
+    "else", "return", "class", "$"
+]
+
+NON_TERMINALS = [
+    "S", "CODE", "VDECL", "ASSIGN", "RHS", "EXPR", "EXPRTAIL",
+    "TERM", "TERMTAIL", "FACTOR", "FDECL", "ARG", "MOREARGS",
+    "BLOCK", "STMT", "COND", "CONDTAIL", "ELSE", "RETURN",
+    "CDECL", "ODECL"
+]
+
 # =========================
 # Production Rules
 # =========================
@@ -133,6 +147,175 @@ def read_tokens(filename):
 
     return tokens
 
+def load_slr_table(filename="grammar/slr_parsing_table.txt"):
+    """
+    Read the LR table copied from the SLR table generation website,
+    and convert it into ACTION and GOTO dictionaries.
+
+    ACTION[state][terminal] = "sN" / "rN" / "acc"
+    GOTO[state][non_terminal] = next_state
+    """
+    with open(filename, "r", encoding="utf-8") as file:
+        content = file.read()
+
+    lr_index = content.rfind("LR table")
+    if lr_index == -1:
+        raise ValueError("LR table section not found in slr_parsing_table.txt")
+
+    lr_content = content[lr_index:]
+
+    # Remove website test input section if it exists
+    if "Input (tokens):" in lr_content:
+        lr_content = lr_content.split("Input (tokens):")[0]
+
+    lines = [line for line in lr_content.splitlines() if line.strip()]
+
+    header_line_index = None
+    for i, line in enumerate(lines):
+        if line.startswith("vtype\tid\tsemi"):
+            header_line_index = i
+            break
+
+    if header_line_index is None:
+        raise ValueError("LR table header line not found.")
+
+    headers = lines[header_line_index].split("\t")
+
+    expected_headers = TERMINALS + NON_TERMINALS
+    if headers != expected_headers:
+        raise ValueError(
+            "LR table headers do not match expected terminals/non-terminals.\n"
+            f"Expected: {expected_headers}\n"
+            f"Found: {headers}"
+        )
+
+    action_table = {}
+    goto_table = {}
+
+    for line in lines[header_line_index + 1:]:
+        parts = line.split("\t")
+
+        if not parts[0].isdigit():
+            continue
+
+        state = int(parts[0])
+        cells = parts[1:]
+
+        # If a row is shorter due to copy/paste formatting, skip it
+        if len(cells) < len(headers):
+            continue
+
+        action_table[state] = {}
+        goto_table[state] = {}
+
+        for index, symbol in enumerate(headers):
+            value = cells[index].strip()
+
+            if value == "":
+                continue
+
+            if symbol in TERMINALS:
+                action_table[state][symbol] = value
+            else:
+                try:
+                    goto_table[state][symbol] = int(value)
+                except ValueError:
+                    # Ignore invalid GOTO values
+                    pass
+
+    return action_table, goto_table
+
+def parse(tokens, action_table, goto_table):
+    """
+    Perform SLR shift-reduce parsing.
+
+    tokens: list of (token, line_no)
+    action_table: ACTION table generated from LR table
+    goto_table: GOTO table generated from LR table
+    """
+    state_stack = [0]
+    symbol_stack = []
+    node_stack = []
+
+    input_index = 0
+
+    while True:
+        current_state = state_stack[-1]
+        current_token, current_line = tokens[input_index]
+
+        action = action_table.get(current_state, {}).get(current_token)
+
+        if action is None:
+            expected_tokens = sorted(action_table.get(current_state, {}).keys())
+
+            print("REJECT")
+            print()
+            print("Syntax Error:")
+            print(f"Line: {current_line}")
+            print(f"Unexpected token: {current_token}")
+            print(f"Expected one of: {', '.join(expected_tokens) if expected_tokens else 'None'}")
+            return False, None
+
+        # Accept
+        if action == "acc":
+            print("ACCEPT")
+            print()
+            print("Parse Tree:")
+
+            if node_stack:
+                print_tree(node_stack[-1])
+            else:
+                print("No parse tree generated.")
+
+            return True, node_stack[-1] if node_stack else None
+
+        # Shift
+        if action.startswith("s"):
+            next_state = int(action[1:])
+
+            symbol_stack.append(current_token)
+            state_stack.append(next_state)
+            node_stack.append(Node(current_token))
+
+            input_index += 1
+
+        # Reduce
+        elif action.startswith("r"):
+            rule_number = int(action[1:])
+            lhs, rhs = PRODUCTIONS[rule_number]
+
+            children = []
+
+            if len(rhs) == 0:
+                # epsilon production
+                children.append(Node("ε"))
+            else:
+                for _ in rhs:
+                    state_stack.pop()
+                    symbol_stack.pop()
+                    children.insert(0, node_stack.pop())
+
+            new_node = Node(lhs, children)
+            node_stack.append(new_node)
+            symbol_stack.append(lhs)
+
+            goto_state = goto_table.get(state_stack[-1], {}).get(lhs)
+
+            if goto_state is None:
+                print("REJECT")
+                print()
+                print("Goto Error:")
+                print(f"No GOTO entry for state {state_stack[-1]} and symbol {lhs}")
+                return False, None
+
+            state_stack.append(goto_state)
+
+        else:
+            print("REJECT")
+            print()
+            print(f"Invalid action: {action}")
+            return False, None
+
 
 def main():
     if len(sys.argv) != 2:
@@ -147,9 +330,13 @@ def main():
         print(f"오류: 입력 파일을 찾을 수 없습니다: {input_file}")
         sys.exit(1)
 
-    print("입력 토큰 목록:")
-    for token, line_no in tokens:
-        print(f"{token} (line {line_no})")
+    try:
+        action_table, goto_table = load_slr_table()
+    except Exception as error:
+        print(f"SLR table 로드 오류: {error}")
+        sys.exit(1)
+
+    parse(tokens, action_table, goto_table)
 
 
 if __name__ == "__main__":

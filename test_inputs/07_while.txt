@@ -1,0 +1,4 @@
+vtype id lparen rparen lbrace
+while lparen boolstr rparen lbrace rbrace
+return num semi
+rbrace
