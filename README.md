@@ -16,9 +16,27 @@
 - 사용 언어: Python 3
 - 실행 환경: Linux / Unix-like OS
 
-## 3. 실행 방법
+## 3. 파일 구조
 
-다음 명령어를 사용하여 실행한다.
+```
+team_31/
+├── syntax_analyzer.py   진입점 (main)
+├── parser.py            토큰 읽기 + SLR 파싱 루프
+├── slr_table.py         SLR table 파일 로드 → ACTION / GOTO 생성
+├── parse_tree.py        파스 트리 노드 구조 및 출력
+├── grammar.py           터미널 / 논터미널 / 생성 규칙 정의
+├── grammar/
+│   ├── modified_cfg.txt       ambiguity를 제거한 수정 CFG
+│   ├── slr_input_cfg.txt      SLR table 생성 도구 입력용 CFG
+│   └── slr_parsing_table.txt  SLR parsing table
+├── test_inputs/         테스트 입력 파일 (21개)
+├── test_outputs/        테스트 실행 결과 파일 (21개)
+└── docs/
+    ├── test_cases.md                        테스트 케이스 입력/출력 정리
+    └── 2026_compiler_term_project (1).pdf   과제 명세서
+```
+
+## 4. 실행 방법
 
 ```bash
 python3 syntax_analyzer.py <input_file>
@@ -37,11 +55,9 @@ chmod +x syntax_analyzer.py
 ./syntax_analyzer.py test_inputs/01_variable_declaration.txt
 ```
 
-## 4. 입력 파일 형식
+## 5. 입력 파일 형식
 
 입력 파일은 공백 또는 줄바꿈으로 구분된 terminal token sequence로 구성된다.
-
-예시:
 
 ```
 vtype id semi
@@ -55,9 +71,9 @@ return num semi
 rbrace
 ```
 
-## 5. 출력 형식
+## 6. 출력 형식
 
-입력 토큰 시퀀스가 문법적으로 올바른 경우 다음과 같이 출력한다.
+입력 토큰 시퀀스가 문법적으로 올바른 경우:
 
 ```
 ACCEPT
@@ -72,7 +88,7 @@ Parse Tree:
         └── ε
 ```
 
-입력 토큰 시퀀스가 문법적으로 올바르지 않은 경우 다음과 같이 출력한다.
+입력 토큰 시퀀스가 문법적으로 올바르지 않은 경우:
 
 ```
 REJECT
@@ -85,19 +101,37 @@ Expected one of: assign, lparen, semi
 
 오류 리포트는 오류가 발생한 line number, 예상하지 못한 token, 예상 가능한 token 목록을 포함한다.
 
-## 6. 제출 파일 구성
+## 7. 테스트 케이스
 
-```
-syntax_analyzer.py         SLR parsing table 기반 syntax analyzer 소스 코드
-grammar/
-  modified_cfg.txt         ambiguity를 제거한 수정 CFG
-  slr_input_cfg.txt        SLR table 생성 도구 입력용 CFG
-  slr_parsing_table.txt    SLR parsing table
-test_inputs/               테스트 입력 파일
-test_outputs/              테스트 실행 결과 파일
-```
+총 21개의 테스트 케이스를 제공한다. (ACCEPT 17개 / REJECT 4개)
 
-## 7. 참고
+| 번호 | 테스트 내용 | 예상 결과 |
+| --- | --- | --- |
+| 01 | 변수 선언 | ACCEPT |
+| 02 | 변수 초기화 | ACCEPT |
+| 03 | 산술식 포함 변수 초기화 | ACCEPT |
+| 04 | 함수 선언 | ACCEPT |
+| 05 | 인자가 있는 함수 선언 | ACCEPT |
+| 06 | if-else 문 | ACCEPT |
+| 07 | while 문 | ACCEPT |
+| 08 | class 선언 | ACCEPT |
+| 09 | 세미콜론 누락 | REJECT |
+| 10 | 비교 연산 조건식 | ACCEPT |
+| 11 | literal RHS 대입 | ACCEPT |
+| 12 | character RHS 대입 | ACCEPT |
+| 13 | boolstr RHS 대입 | ACCEPT |
+| 14 | 여러 개의 함수 인자 선언 | ACCEPT |
+| 15 | 괄호가 포함된 산술식 | ACCEPT |
+| 16 | 함수 블록 내부의 변수 선언 및 대입문 | ACCEPT |
+| 17 | class 내부 함수 선언 | ACCEPT |
+| 18 | 잘못된 토큰 (vtype 뒤 semi) | REJECT |
+| 19 | 닫는 중괄호 누락 | REJECT |
+| 20 | 최상위 레벨 대입문 | REJECT |
+| 21 | 연산자 연속 사용 | REJECT |
+
+각 테스트 케이스의 상세 입력/출력은 [docs/test_cases.md](docs/test_cases.md)를 참고한다.
+
+## 8. 참고
 
 - Chung-Ang University, Department of Software Engineering
 - Compiler (Professor: Kim Hyo Su)
